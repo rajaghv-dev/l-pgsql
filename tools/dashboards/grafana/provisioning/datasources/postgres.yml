@@ -1,0 +1,17 @@
+apiVersion: 1
+
+datasources:
+  - name: PostgreSQL
+    type: postgres
+    uid: cfp-postgres
+    url: cfp_postgres:5432
+    user: cfp
+    jsonData:
+      database: cfp
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: false
+    secureJsonData:
+      password: cfp
+    isDefault: false
+    editable: true

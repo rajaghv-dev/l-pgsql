@@ -1,0 +1,15 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "cfp_postgres (learning)",
+      "Group": "Local",
+      "Host": "cfp_postgres",
+      "Port": 5432,
+      "MaintenanceDB": "cfp",
+      "Username": "cfp",
+      "SSLMode": "prefer",
+      "PassFile": "/pgadmin4/pgpass",
+      "Comment": "PostgreSQL 16.13 — pgvector/pgvector:pg16"
+    }
+  }
+}

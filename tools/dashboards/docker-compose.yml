@@ -1,0 +1,143 @@
+# Dashboard stack for the PostgreSQL learning repo.
+# All services join cfp_default so they reach cfp_postgres, cfp_redis, cfp_ollama by name.
+#
+# Start:   docker compose -f tools/dashboards/docker-compose.yml up -d
+# Stop:    docker compose -f tools/dashboards/docker-compose.yml down
+# Logs:    docker compose -f tools/dashboards/docker-compose.yml logs -f <service>
+
+networks:
+  cfp_default:
+    external: true
+
+volumes:
+  pgadmin_data:
+  grafana_data:
+  prometheus_data:
+  redisinsight_data:
+  open_webui_data:
+
+services:
+
+  # ── PostgreSQL management dashboard ──────────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: dash_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_SERVER_JSON_FILE: /pgadmin4/servers.json
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
+      - ./pgadmin/pgpass:/pgadmin4/pgpass:ro
+    ports:
+      - "5050:80"
+    networks:
+      - cfp_default
+
+  # ── Lightweight multi-DB browser (PG + Redis) ─────────────────────────
+  adminer:
+    image: adminer:4
+    container_name: dash_adminer
+    restart: unless-stopped
+    environment:
+      ADMINER_DEFAULT_SERVER: cfp_postgres
+      ADMINER_DESIGN: pepa-linha-dark
+    ports:
+      - "8082:8080"
+    networks:
+      - cfp_default
+
+  # ── Prometheus — metrics collection ───────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.51.2
+    container_name: dash_prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+      - "--web.enable-lifecycle"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - cfp_default
+
+  # ── postgres_exporter — PG metrics for Prometheus ─────────────────────
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: dash_postgres_exporter
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: "postgresql://cfp:cfp@cfp_postgres:5432/cfp?sslmode=disable"
+    ports:
+      - "9187:9187"
+    networks:
+      - cfp_default
+
+  # ── redis_exporter — Redis metrics for Prometheus ─────────────────────
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.61.0
+    container_name: dash_redis_exporter
+    restart: unless-stopped
+    environment:
+      REDIS_ADDR: "redis://cfp_redis:6379"
+    ports:
+      - "9121:9121"
+    networks:
+      - cfp_default
+
+  # ── Grafana — dashboards ───────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: dash_grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_INSTALL_PLUGINS: "grafana-clock-panel,grafana-simple-json-datasource"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - cfp_default
+
+  # ── RedisInsight — Redis GUI ──────────────────────────────────────────
+  redisinsight:
+    image: redis/redisinsight:2.50
+    container_name: dash_redisinsight
+    restart: unless-stopped
+    volumes:
+      - redisinsight_data:/data
+    ports:
+      - "5540:5540"
+    networks:
+      - cfp_default
+
+  # ── Open WebUI — Ollama chat + embedding UI ───────────────────────────
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: dash_open_webui
+    restart: unless-stopped
+    environment:
+      OLLAMA_BASE_URL: "http://cfp_ollama:11434"
+      WEBUI_AUTH: "false"
+    volumes:
+      - open_webui_data:/app/backend/data
+    ports:
+      - "8080:8080"
+    networks:
+      - cfp_default
