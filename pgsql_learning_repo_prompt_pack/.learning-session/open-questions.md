@@ -9,6 +9,6 @@
 
 ## Open
 
-- Should the learning repo be a new separate repo or live alongside the prompt pack at `/mnt/d/wsl/l-pgsql/`?
-- Should a dedicated learning database/schema be created in the `cfp` Postgres instance, or should a separate DB be created?
+- Should a dedicated learning database/schema be created in the `cfp` Postgres instance, or should a separate DB be created? (Recommendation: create a `learning` schema or separate `pgsql_learning` DB to avoid polluting the `cfp` DB used by other services.)
+- Should `shared_preload_libraries = 'pg_stat_statements'` be configured before Stage 1 to unblock observability lessons?
 - Is there a preferred naming convention for the learning DB/schema?

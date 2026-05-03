@@ -2,6 +2,12 @@
 
 ## Stage 0 — 2026-05-03
 
+Created (new files):
+- `scripts/stage-00/validate-env.sh` — shell script: checks git, Docker, container, psql, extensions, session files
+- `scripts/stage-00/validate-extensions.sql` — SQL script: installs and functionally tests all required extensions
+- `scripts/stage-00/validate-session-files.sh` — shell script: checks all session and control files exist and are non-empty
+- `.gitignore`
+
 Updated (pre-existing session scaffolding files):
 - `.learning-session/current-stage.md`
 - `.learning-session/stage-history.md`
