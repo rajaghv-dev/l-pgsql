@@ -1,5 +1,42 @@
 # Validation Log
 
+## Stage 1 — 2026-05-03
+
+### File and directory check
+Result: **25 PASS, 0 FAIL**
+
+| Check | Result |
+|-------|--------|
+| README.md | PASS |
+| learning-roadmap.md | PASS |
+| beginner-roadmap.md | PASS |
+| intermediate-roadmap.md | PASS |
+| advanced-roadmap.md | PASS |
+| AGENT_GUIDE.md | PASS |
+| CONTRIBUTING.md | PASS |
+| references.md | PASS |
+| extension-map.md | PASS |
+| capability-map.md | PASS |
+| concepts/beginner/ | PASS |
+| concepts/intermediate/ | PASS |
+| concepts/advanced/ | PASS |
+| practice/beginner/ | PASS |
+| practice/intermediate/ | PASS |
+| practice/advanced/ | PASS |
+| examples/beginner/ | PASS |
+| examples/intermediate/ | PASS |
+| examples/advanced/ | PASS |
+| diagrams/ | PASS |
+| ontology/ | PASS |
+| extensions/ | PASS |
+| design-principles/ | PASS |
+| reflections/ | PASS |
+| tools/templates/ | PASS |
+
+No SQL in this stage — nothing to validate against container.
+
+---
+
 ## Stage 0 — 2026-05-03
 
 ### Script: validate-session-files.sh

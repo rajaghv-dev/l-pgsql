@@ -10,15 +10,15 @@ Read:
 
 ## Current state (as of 2026-05-03)
 
-- Current stage: **Stage 1 — Foundation Skeleton** (Stage 0 completed with validation)
-- Status: waiting for user permission to proceed to Stage 1
+- Current stage: **Stage 2 — Templates and Validation Scripts** (Stage 1 completed with validation)
+- Status: waiting for user permission to proceed to Stage 2
 
 ## Key environment facts
 
 - Postgres: `docker exec cfp_postgres psql -U cfp -d cfp -c "..."`
 - PostgreSQL 16.13, pgvector/pgvector:pg16 image
 - psql NOT on host PATH — always use docker exec
-- Git NOT initialized at `/mnt/d/wsl/l-pgsql/` — must `git init` before Stage 1
+- Git initialized at `/mnt/d/wsl/l-pgsql/`
 - 48 extensions available including: `vector`, `pgcrypto`, `pg_stat_statements`, `pg_trgm`, `hstore`, `ltree`, `uuid-ossp`
 - No `pg_cron`, no `timescaledb`, no `postgis`
 

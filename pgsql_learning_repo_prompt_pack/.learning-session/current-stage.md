@@ -1,5 +1,5 @@
 # Current Stage
 
-Stage: 0
-Name: Audit, Safety, and Session Setup
+Stage: 1
+Name: Foundation Skeleton
 Status: completed with validation
