@@ -148,3 +148,27 @@ These are lower-priority items identified but not acted on in this session:
 3. After Stage 2: update `pgsql_learning_repo_prompt_pack/CURRENT_STAGE.md` to Stage 2 completed, then stop and ask permission for Stage 3.
 4. On first push to GitHub: review CI output from `validate.yml` for Markdown/YAML lint failures and fix them.
 5. Do not touch `concepts/`, `practice/`, or `examples/` until Stage 3 is permitted.
+
+---
+
+## Update — 2026-05-16 Full Build
+
+All 30 stages generated in this session via 11 parallel agents. See PROGRESS.md for stage-by-stage status.
+
+### Summary of new content
+- 21 beginner lessons + 10 practice sessions
+- 25 intermediate lessons + 16 practice sessions
+- 29 advanced lessons
+- 4 beginner + 13 intermediate + 7 advanced domain examples
+- 8 extension deep-dives + 6 extension stubs
+- 16 ontology concept map files
+- 11 Mermaid diagram files
+- 11 design principle files
+- 12 reflection question bank files
+
+### Next agent task
+Validate all SQL content. Enable Docker Desktop WSL2 integration, then:
+```bash
+bash scripts/validate-all-stages.sh
+```
+Fix any broken SQL. Commit validated content.

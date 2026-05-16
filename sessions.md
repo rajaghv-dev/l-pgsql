@@ -46,6 +46,27 @@ Session log and current state. Update this at the end of every session.
 
 ---
 
+### Full build — 2026-05-16 (continuation of Session 2)
+
+**Work in progress:** Stages 3–29 content generation via parallel agents.
+
+**Stages being generated simultaneously:**
+- Stages 3–6: Beginner lessons and practices
+- Stages 7–11: Intermediate lessons and practices
+- Stage 12: Extension learning map
+- Stages 13–14: Ontology core and advanced
+- Stages 15–17: Beginner/intermediate/advanced examples
+- Stages 18–20: Advanced core and architecture lessons
+- Stages 21–23: Diagrams, design principles, reflections
+- Stage 24: References curation
+- Stages 26–29: MCP/agent safety content
+
+**SQL validation:** Blocked — Docker not accessible in current session. All SQL files created with inline note: "blocked: Docker not accessible; validate against cfp_postgres when Docker Desktop WSL2 integration is enabled."
+
+**PostGIS content:** Created as reference-only — postgis not available in cfp_postgres image.
+
+---
+
 ### Session 1 — 2026-05-03
 
 **Stages completed:** Stage 0 (audit + session setup), Stage 1 (foundation skeleton)

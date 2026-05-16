@@ -4,6 +4,28 @@
 
 - Added staged prompt pack for PostgreSQL learning repository generation.
 
+## Full build Stages 3–29 — 2026-05-16
+
+- Stages 3–29 content generated via parallel agents
+- Created: 21 beginner lessons, 25 intermediate lessons, 29 advanced lessons
+- Created: 10 beginner practice sessions, 16 intermediate practice sessions
+- Created: 4 beginner examples, 13 intermediate examples, 7 advanced examples
+- Created: 8 extension deep-dives + 6 placeholder files
+- Created: 16 ontology concept map files
+- Created: 11 Mermaid diagrams
+- Created: 11 design principle files
+- Created: 12 reflection question bank files
+- Created: curated references.md
+- SQL validation: blocked — Docker not accessible in generation session; re-validate against cfp_postgres when Docker Desktop WSL2 integration is enabled
+- PostGIS content: reference-only (not available in cfp_postgres image)
+- TimescaleDB content: reference-only (not available in cfp_postgres image)
+
+## Stage 2 — 2026-05-16
+
+- Created 11 lesson and practice templates in `tools/templates/`
+- Created 7 validation scripts in `scripts/`: check-required-files.sh, validate-practice-structure.sh, validate-stage.sh, validate-sql-files.sh, validate-extension-availability.sql, run-example.sh, README.md
+- Validation: 17/17 PASS (file check), SQL blocked (Docker not accessible)
+
 ## Repo refactor — 2026-05-16 (Session 2, not a learning stage)
 
 - Fixed stale `CURRENT_STAGE.md` (was "Stage 0 not-started"; now correctly "Stage 1 completed with validation").

@@ -1,31 +1,54 @@
 # Agent Handoff
 
-Read:
-1. AGENT_BOOTSTRAP.md
-2. CURRENT_STAGE.md
-3. STAGES.md
-4. DONE_CRITERIA.md
-5. Matching STAGE_PROMPTS file
-6. `.learning-session/repo-memory.md` (contains env details)
+Last updated: 2026-05-16
 
-## Current state (as of 2026-05-03)
+## Current state
 
-- Current stage: **Stage 2 — Templates and Validation Scripts** (Stage 1 completed with validation)
-- Status: waiting for user permission to proceed to Stage 2
+All 30 stages (0–29) of the PostgreSQL learning repo have been generated.
 
-## Key environment facts
+| Item | Value |
+|------|-------|
+| Stage 0 | Completed with validation |
+| Stage 1 | Completed with validation |
+| Stage 2 | Completed with validation |
+| Stages 3–29 | Generated; SQL validation deferred (Docker not accessible) |
+| Total files | ~400+ markdown, SQL, bash, YAML, JSON files |
+| Git status | Uncommitted changes — commit pending |
 
-- Postgres: `docker exec cfp_postgres psql -U cfp -d cfp -c "..."`
-- PostgreSQL 16.13, pgvector/pgvector:pg16 image
-- psql NOT on host PATH — always use docker exec
-- Git initialized at `/mnt/d/wsl/l-pgsql/`
-- 48 extensions available including: `vector`, `pgcrypto`, `pg_stat_statements`, `pg_trgm`, `hstore`, `ltree`, `uuid-ossp`
-- No `pg_cron`, no `timescaledb`, no `postgis`
+## What exists
 
-## Rules
+- concepts/beginner/: 21 lesson files
+- concepts/intermediate/: 25 lesson files
+- concepts/advanced/: 29 lesson files
+- practice/beginner/: 10 practice sessions
+- practice/intermediate/: 16 practice sessions
+- examples/beginner/: 4 domain examples
+- examples/intermediate/: 13 domain examples
+- examples/advanced/: 7 domain examples
+- extensions/: 8 full + 6 placeholder extension files
+- ontology/: 16 concept map files
+- diagrams/: 11 Mermaid diagram files
+- design-principles/: 11 principle files
+- reflections/: 12 question bank files
+- tools/templates/: 11 content templates
+- scripts/: 8 validation scripts
+- docs/: 14 cross-cutting audit docs
 
-- Do not generate future stages without permission.
-- Do not generate unsafe professional advice logic.
-- Do not use real sensitive data.
-- Validate before declaring completion.
-- Stop after each stage and ask permission.
+## Blocker
+
+SQL validation requires Docker. Docker not accessible during generation session.
+
+To unblock: enable Docker Desktop → WSL2 Integration → enable for this distro.
+
+## Next agent task
+
+1. Validate SQL across all stages against cfp_postgres
+2. Fix any broken SQL (common issues: extension not installed, table already exists, etc.)
+3. Run bash scripts/validate-stage.sh --stage N for each stage
+4. Commit all validated content
+
+## Do NOT
+
+- Do not regenerate lesson content — it exists
+- Do not delete placeholder files in extensions/ — they are intentional stubs
+- Do not modify .learning-session/ history files

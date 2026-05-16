@@ -1,7 +1,7 @@
 # Repo Inventory
 
 Generated: 2026-05-16  
-Phase: 0 — Baseline inspection  
+Phase: 29 — All stages generated  
 Agent: Claude Sonnet 4.6
 
 ---
@@ -176,12 +176,50 @@ None — this is a learning content repo. No public API surface. The "interface"
 
 ## Examples and demos
 
-| Location | Status | Notes |
-|---|---|---|
-| `examples/beginner/` | Placeholder only (`README.md`) | Stage 15 will populate |
-| `examples/intermediate/` | Placeholder only | Stage 16 will populate |
-| `examples/advanced/` | Placeholder only | Stage 17 will populate |
-| `arch.md` (inline) | 5 extension code examples | pgvector, pg_trgm, pgcrypto, ltree, RLS — runnable |
+### Beginner examples (`examples/beginner/` — 4 domain folders, 5 .md files)
+
+| Folder | Domain |
+|---|---|
+| `library-catalog/` | Library catalog (books, members, loans) |
+| `personal-notes/` | Personal note-taking app |
+| `simple-store/` | Simple retail store |
+| `todo-app/` | Todo / task list app |
+
+### Intermediate examples (`examples/intermediate/` — 12 domain folders, 8 .md files)
+
+| Folder | Domain |
+|---|---|
+| `ai-agent-memory/` | AI agent memory and context store |
+| `compliance-audit/` | Compliance audit trail |
+| `compliance-evidence-agent/` | Regulated-domain: compliance evidence agent |
+| `document-search/` | Full-text and vector document search |
+| `ecommerce/` | E-commerce orders and catalog |
+| `finance-invoice-approval-agent/` | Regulated-domain: finance invoice approval |
+| `geospatial-store-locator/` | PostGIS store locator |
+| `legal-case-notes-agent/` | Regulated-domain: legal case notes |
+| `medical-record-retrieval-agent/` | Regulated-domain: medical record retrieval |
+| `multi-tenant-saas/` | Multi-tenant SaaS with RLS |
+| `observability/` | Observability and metrics queries |
+| `office-team-task-agent/` | Regulated-domain: office team task agent |
+| `pharma-quality-check-agent/` | Regulated-domain: pharma quality checks |
+
+### Advanced examples (`examples/advanced/` — 7 domain folders, 1 .md file — stubs)
+
+| Folder | Domain |
+|---|---|
+| `ai-agent-memory-platform/` | Full agent memory platform |
+| `event-sourcing-audit/` | Event sourcing and audit log |
+| `finance-ledger/` | Finance ledger with double-entry accounting |
+| `hybrid-search-system/` | Hybrid BM25 + vector search |
+| `rls-saas-platform/` | RLS-enforced multi-tenant SaaS |
+| `support-ticketing/` | Support ticket system |
+| `time-series-monitoring/` | Time-series monitoring with partitioning |
+
+### Inline examples
+
+| Location | Notes |
+|---|---|
+| `arch.md` | 5 runnable extension examples: pgvector, pg_trgm, pgcrypto, ltree, RLS |
 
 ---
 
@@ -226,10 +264,12 @@ No secrets, API keys, or production credentials detected.
 
 | Gap | Severity | Notes |
 |---|---|---|
-| **F-01**: `CURRENT_STAGE.md` in prompt pack root is stale | High | Says "Stage 0 / not-started" — reality is Stage 1 completed |
+| **F-01**: `CURRENT_STAGE.md` in prompt pack root is stale | High | Says "Stage 0 / not-started" — reality is all 30 stages generated |
+| SQL exercises not validated | High | Docker not accessible during generation; run `bash scripts/validate-all-stages.sh` with Docker running |
+| Advanced examples are stubs | Medium | 7 folders exist in `examples/advanced/` but most have minimal content |
+| Reflection question banks incomplete | Medium | `reflections/` has README only; full question banks for stages 3-29 not yet generated |
 | No `.github/` directory | Medium | No CI, no issue templates, no PR template, no Dependabot |
-| `docs/` directory absent | Medium | All cross-cutting docs live at root; hard to navigate at scale |
-| Content directories are all placeholders | Low | Correct — Stages 3–29 have not run yet |
+| `concepts/advanced/` has numbering gaps | Low | Files 09-24 absent — advanced lesson series is split across stages 18-20 with non-contiguous numbering |
 | `AGENTS.md` not present at root | Low | `AGENT_GUIDE.md` exists but `AGENTS.md` (new format) does not |
 | Python venv `.l-pgsql/` on disk | Info | In .gitignore; no Python source in repo — venv is unused |
 | `.obsidian/` untracked | Info | Intentionally not tracked (in .gitignore omitted — but currently untracked rather than ignored) |

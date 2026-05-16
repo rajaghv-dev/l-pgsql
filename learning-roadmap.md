@@ -28,11 +28,11 @@ Every major topic includes an agent/MCP angle. See `MASTER_SPEC.md` in the promp
 |-------|---------|
 | 0 | Audit, safety, session setup — completed |
 | 1 | Foundation skeleton — completed |
-| 2 | Templates and validation scripts ← next (awaiting permission) |
-| 3–6 | Beginner lessons |
-| 7–11 | Intermediate lessons |
-| 12–14 | Extension map, ontology |
-| 15–17 | Examples (beginner / intermediate / advanced) |
-| 18–20 | Advanced lessons |
-| 21–25 | Diagrams, design, Q-banks, references, final review |
-| 26–29 | MCP / agent safety content |
+| 2 | Templates and validation scripts — completed |
+| 3–6 | Beginner lessons — in progress |
+| 7–11 | Intermediate lessons — in progress |
+| 12–14 | Extension map, ontology — in progress |
+| 15–17 | Examples (beginner / intermediate / advanced) — in progress |
+| 18–20 | Advanced lessons — in progress |
+| 21–25 | Diagrams, design, Q-banks, references, final review — in progress |
+| 26–29 | MCP / agent safety content — in progress |

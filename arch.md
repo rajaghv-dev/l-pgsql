@@ -360,21 +360,21 @@ Agent use: multi-tenant SaaS, per-user data isolation.
 |-------|-------|---------|
 | 0 | Setup | Audit, environment, session init — completed |
 | 1 | Setup | Foundation skeleton — completed |
-| 2 | Setup | Templates and validation scripts ← next (awaiting permission) |
-| 3–4 | Beginner | Core lessons (schema, CRUD, constraints) |
-| 5 | Beginner | Querying, indexes, transactions |
-| 6 | Beginner | Non-SQL intro (JSONB, FTS, pgvector) |
-| 7–8 | Intermediate | Schema design, EXPLAIN, index types |
-| 9 | Intermediate | Transactions, MVCC, locking |
-| 10 | Intermediate | Extensions and non-SQL |
-| 11 | Intermediate | Security, audit, observability |
-| 12 | Reference | Extension learning map |
-| 13–14 | Ontology | Core + advanced concept maps |
-| 15–17 | Examples | Beginner / intermediate / advanced |
-| 18–20 | Advanced | Core, architecture, operations |
-| 21 | Visuals | Diagrams |
-| 22 | Design | Design principles |
-| 23 | Reflection | Question banks |
-| 24 | Reference | References curation |
-| 25 | QA | Final quality review |
-| 26–29 | Agent | MCP, agent safety, RLS, regulated domains |
+| 2 | Setup | Templates and validation scripts — completed |
+| 3–4 | Beginner | Core lessons (schema, CRUD, constraints) — in progress |
+| 5 | Beginner | Querying, indexes, transactions — in progress |
+| 6 | Beginner | Non-SQL intro (JSONB, FTS, pgvector) — in progress |
+| 7–8 | Intermediate | Schema design, EXPLAIN, index types — in progress |
+| 9 | Intermediate | Transactions, MVCC, locking — in progress |
+| 10 | Intermediate | Extensions and non-SQL — in progress |
+| 11 | Intermediate | Security, audit, observability — in progress |
+| 12 | Reference | Extension learning map — in progress |
+| 13–14 | Ontology | Core + advanced concept maps — in progress |
+| 15–17 | Examples | Beginner / intermediate / advanced — in progress |
+| 18–20 | Advanced | Core, architecture, operations — in progress |
+| 21 | Visuals | Diagrams — in progress |
+| 22 | Design | Design principles — in progress |
+| 23 | Reflection | Question banks — in progress |
+| 24 | Reference | References curation — in progress |
+| 25 | QA | Final quality review — in progress |
+| 26–29 | Agent | MCP, agent safety, RLS, regulated domains — in progress |
