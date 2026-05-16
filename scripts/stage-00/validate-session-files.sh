@@ -61,10 +61,10 @@ check_file "scripts/stage-00/validate-extensions.sql"
 echo
 echo "=== Content checks ==="
 CURRENT="$REPO_ROOT/pgsql_learning_repo_prompt_pack/.learning-session/current-stage.md"
-if grep -q "Stage: 0" "$CURRENT"; then
-    pass "current-stage.md: Stage: 0 found"
+if grep -q "^Stage:" "$CURRENT"; then
+    pass "current-stage.md: Stage: field found (correctly formatted)"
 else
-    fail "current-stage.md: Stage: 0 not found"
+    fail "current-stage.md: Stage: field missing — file may be malformed"
 fi
 
 if grep -q "completed" "$CURRENT"; then

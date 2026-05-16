@@ -1,0 +1,39 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Lint YAML (yamllint)
+        run: |
+          pip install --quiet yamllint
+          yamllint --config-data relaxed .
+
+      - name: Lint Markdown (markdownlint-cli2)
+        run: |
+          npm install --global --silent markdownlint-cli2
+          if [ -f .markdownlint.yaml ]; then
+            markdownlint-cli2 --config .markdownlint.yaml "**/*.md"
+          else
+            markdownlint-cli2 \
+              --config '{"default":true,"MD013":false,"MD033":false,"MD041":false}' \
+              "**/*.md"
+          fi
+
+      - name: Validate docker-compose syntax
+        continue-on-error: true
+        run: |
+          docker compose -f tools/dashboards/docker-compose.yml config --quiet

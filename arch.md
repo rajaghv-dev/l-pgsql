@@ -358,9 +358,9 @@ Agent use: multi-tenant SaaS, per-user data isolation.
 
 | Stage | Layer | Content |
 |-------|-------|---------|
-| 0 | Setup | Audit, environment, session init |
-| 1 | Setup | Foundation skeleton ← current |
-| 2 | Setup | Templates and validation scripts |
+| 0 | Setup | Audit, environment, session init — completed |
+| 1 | Setup | Foundation skeleton — completed |
+| 2 | Setup | Templates and validation scripts ← next (awaiting permission) |
 | 3–4 | Beginner | Core lessons (schema, CRUD, constraints) |
 | 5 | Beginner | Querying, indexes, transactions |
 | 6 | Beginner | Non-SQL intro (JSONB, FTS, pgvector) |

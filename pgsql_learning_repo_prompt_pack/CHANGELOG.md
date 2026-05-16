@@ -4,6 +4,17 @@
 
 - Added staged prompt pack for PostgreSQL learning repository generation.
 
+## Repo refactor — 2026-05-16 (Session 2, not a learning stage)
+
+- Fixed stale `CURRENT_STAGE.md` (was "Stage 0 not-started"; now correctly "Stage 1 completed with validation").
+- Added `docs/` directory with 14 cross-cutting audit and reference documents.
+- Added `AGENTS.md` agent bootstrap at repo root.
+- Added `.github/workflows/validate.yml` (YAML + Markdown lint CI).
+- Added `.github/PULL_REQUEST_TEMPLATE.md`.
+- Fixed `.gitignore`: added `.obsidian/`.
+- Updated stage map labels in `arch.md` and `learning-roadmap.md`.
+- Fixed `scripts/stage-00/validate-session-files.sh`: removed hardcoded `Stage: 0` check.
+
 ## Stage 1 — 2026-05-03
 
 - Created foundation skeleton: README.md, learning-roadmap.md, beginner/intermediate/advanced roadmaps, AGENT_GUIDE.md, CONTRIBUTING.md, references.md, extension-map.md, capability-map.md.

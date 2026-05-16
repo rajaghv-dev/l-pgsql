@@ -4,7 +4,7 @@ Session log and current state. Update this at the end of every session.
 
 ---
 
-## Current state (2026-05-03)
+## Current state (2026-05-16)
 
 | Item | Value |
 |------|-------|
@@ -16,6 +16,35 @@ Session log and current state. Update this at the end of every session.
 ---
 
 ## Session log
+
+### Session 2 — 2026-05-16
+
+**Type:** Repo audit and documentation refactor (not a learning stage)
+
+**Work done:** Full Phase 0–16 repo refactor pass
+
+**Files changed:**
+- `pgsql_learning_repo_prompt_pack/CURRENT_STAGE.md` — fixed stale stage (was Stage 0 not-started)
+- `.gitignore` — added `.obsidian/`
+- `arch.md` — updated stage map labels
+- `learning-roadmap.md` — updated stage map labels
+- `scripts/stage-00/validate-session-files.sh` — fixed hardcoded `Stage: 0` check
+
+**Files created:**
+- `docs/` directory (new)
+- `docs/repo-inventory.md`, `docs/doc-code-consistency-audit.md`, `docs/code-quality-audit.md`
+- `docs/refactor-plan.md`, `docs/architecture.md`, `docs/interfaces.md`
+- `docs/setup-validation.md`, `docs/testing.md`, `docs/github-readiness.md`
+- `docs/security-audit.md`, `docs/examples.md`, `docs/observability.md`
+- `docs/agent-handoff.md`, `docs/tooling-gaps.md`, `docs/github-update-summary.md`
+- `AGENTS.md`
+- `.github/workflows/validate.yml`
+- `.github/PULL_REQUEST_TEMPLATE.md`
+- `reports/final-validation-report.md`
+
+**Validation:** See `reports/final-validation-report.md`
+
+---
 
 ### Session 1 — 2026-05-03
 
@@ -60,5 +89,7 @@ Minimum reads for a new agent:
 2. `sessions.md` — this file
 3. `pgsql_learning_repo_prompt_pack/CURRENT_STAGE.md` — confirms Stage 1 done
 4. `pgsql_learning_repo_prompt_pack/STAGE_PROMPTS/stage-02-templates-and-validation-scripts.md` — next work order
+5. `AGENTS.md` — repo rules for agents (new in Session 2)
+6. `docs/agent-handoff.md` — full refactor context (new in Session 2)
 
 Do NOT read the full `.learning-session/` folder unless you need validation details — `memory.md` + `sessions.md` cover the essentials.

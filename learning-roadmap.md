@@ -26,9 +26,9 @@ Every major topic includes an agent/MCP angle. See `MASTER_SPEC.md` in the promp
 
 | Stage | Content |
 |-------|---------|
-| 0 | Audit, safety, session setup |
-| 1 | Foundation skeleton ← current |
-| 2 | Templates and validation scripts |
+| 0 | Audit, safety, session setup — completed |
+| 1 | Foundation skeleton — completed |
+| 2 | Templates and validation scripts ← next (awaiting permission) |
 | 3–6 | Beginner lessons |
 | 7–11 | Intermediate lessons |
 | 12–14 | Extension map, ontology |

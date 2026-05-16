@@ -1,27 +1,24 @@
 # CURRENT_STAGE
 
-Stage: 0
-Name: Audit, Safety, and Session Setup
-Status: not-started
+Stage: 1
+Name: Foundation Skeleton
+Status: completed with validation
 
-## Allowed work
+## Completed
 
-- Inspect repo
-- Create `STAGES.md`
-- Create `.learning-session/`
-- Create or update `TODO.md`
-- Create or update `CHANGELOG.md`
-- Save prompts/spec references
-- Run Stage 0 self-tests
+- Stage 0: Audit, Safety, and Session Setup — completed with validation (2026-05-03)
+- Stage 1: Foundation Skeleton — completed with validation (2026-05-03)
 
-## Not allowed
+## Waiting for permission to start
 
-- Do not create beginner lessons
-- Do not create examples
-- Do not create advanced content
-- Do not create all stage outputs
-- Do not continue to Stage 1
+- Stage 2: Templates and Validation Scripts
+- Prompt: `STAGE_PROMPTS/stage-02-templates-and-validation-scripts.md`
 
-## After completion
+## Not allowed (do not start)
 
-Stop and ask permission before Stage 1.
+- Stage 3 or higher — not started
+- Do not create lesson content yet
+
+## After Stage 2
+
+Stop and ask permission before Stage 3.
