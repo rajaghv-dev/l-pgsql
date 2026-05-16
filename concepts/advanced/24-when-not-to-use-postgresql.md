@@ -1,89 +1,198 @@
 # When NOT to Use PostgreSQL
 
 Level: Advanced
-PostgreSQL 16 | Container: `docker exec cfp_postgres psql -U cfp -d cfp`
 
 ## One-line intuition
-Knowing when to walk away from PostgreSQL is as important as knowing how to use it — every tool has a domain where it is the wrong choice.
+PostgreSQL's honest limits are real and specific — knowing them prevents you from building systems that work in development and fail in production at scale.
 
 ## Why this exists
-PostgreSQL advocacy can become PostgreSQL dogma. Honest engineers acknowledge that some workloads genuinely require specialized systems, and using PostgreSQL for those workloads creates operational debt, performance problems, and unnecessary complexity.
+PostgreSQL advocacy can become PostgreSQL dogma. Advanced practitioners owe themselves and their teams an honest accounting of where PostgreSQL's architecture creates hard limits that cannot be optimized away. Some workloads genuinely require specialized systems, and using PostgreSQL for those workloads creates compounding technical debt.
 
 ## First-principles explanation
-PostgreSQL is a row-store, single-leader OLTP database with MVCC, SQL, and an extension ecosystem. These properties make it excellent for transactional workloads with complex queries. They also create inherent limitations at extremes: MVCC adds write overhead, row-based storage is inefficient for OLAP, single-leader limits global write distribution, and general-purpose parsing adds latency unavoidable for cache-tier use.
 
-## When NOT to use PostgreSQL
+### PostgreSQL's structural limits
+PostgreSQL's architecture creates unavoidable constraints:
 
-### 1. Sub-millisecond latency requirements
-**Use instead**: Redis, Memcached, Dragonfly
+**Row-store storage**: All columns of a row are stored together. OLAP queries that access 3 of 50 columns must read all 50 — 94% wasted IO. Column-store systems skip irrelevant columns entirely.
 
-If your application requires P99 latency under 1ms (session caches, rate limiters, real-time leaderboards), PostgreSQL's parsing, planning, and network overhead makes it the wrong tool. Use an in-memory store.
+**MVCC dead tuple tax**: Every UPDATE creates a new row version. Every DELETE marks a row dead. Dead rows accumulate until VACUUM removes them. At > 500K writes/second, vacuum cannot keep up — bloat accumulates unboundedly.
 
-### 2. Global active-active writes across regions
-**Use instead**: CockroachDB, Cassandra, DynamoDB
+**Single-leader write model**: All writes go to one primary. Replicas are read-only. Cross-region writes require routing to the primary — adding 50-150ms of network latency for users in distant regions.
 
-PostgreSQL's streaming replication is leader-based. All writes go to the primary. If you need low-latency writes from multiple geographic regions simultaneously, PostgreSQL requires application-level conflict resolution that is error-prone. Distributed databases handle this natively.
+**Process-per-connection**: Each connection is an OS process (~5-10MB RAM). At 10,000 connections, this is 50-100GB of RAM just for process metadata. Connection pooling helps but has its own limits.
 
-### 3. OLAP on billions of rows with sub-second response
-**Use instead**: ClickHouse, DuckDB, BigQuery, Redshift
+**WAL-first writes**: Every write goes to WAL before the data file. WAL is sequential, but it adds latency. At extreme throughput, WAL write rate becomes the bottleneck.
 
-PostgreSQL's row-based storage reads full rows even for queries touching 2 columns out of 50. Column-store systems compress and vectorize OLAP queries to run 10–100x faster on the same hardware at analytical scale.
+### Hard limits — when PostgreSQL structurally fails
 
-### 4. IoT telemetry at > 500k writes/second sustained
-**Use instead**: InfluxDB, TimescaleDB, QuestDB
+#### 1. IoT telemetry at 1M+ writes/second sustained
+**Why PostgreSQL fails**: MVCC write amplification + vacuum lag + WAL throughput bottleneck. At 1M rows/second, WAL generates ~1GB/s continuously. Dead tuple accumulation from any UPDATEs or DELETEs overwhelms vacuum workers. Even with TimescaleDB (which helps significantly with its columnar compression and automatic partitioning), pure PostgreSQL/TimescaleDB hits a wall around 200-500K writes/second on reasonable hardware.
 
-MVCC means every UPDATE or DELETE creates dead tuples requiring vacuum. At extreme write rates, vacuum cannot keep up and bloat accumulates. TimescaleDB (a PostgreSQL extension) extends the ceiling significantly, but InfluxDB is purpose-built for this ceiling.
+**Real ceiling**: ~100-200K inserts/second for simple time-series with no indexes, on high-end NVMe hardware.
 
-### 5. Native graph algorithms at graph scale
-**Use instead**: Neo4j, Memgraph, Amazon Neptune
+**Use instead**: InfluxDB, QuestDB, Apache Druid (each engineered for this specific write pattern).
 
-PostgreSQL can model graphs with recursive CTEs, but traversal is O(n) in SQL — each hop requires a new join. Native graph databases store adjacency lists as first-class objects with O(1) edge traversal. For graph algorithms (PageRank, shortest path, community detection) on millions of edges, use a native graph database.
+#### 2. Global active-active multi-region writes
+**Why PostgreSQL fails**: The single-leader model cannot provide low-latency writes from multiple regions. A write from Tokyo to a US primary has ~150ms RTT before returning. BDR (Bi-Directional Replication, commercial extension) adds multi-master but requires application-level conflict resolution — which is error-prone and complex.
 
-### 6. Event streaming / pub-sub at scale
-**Use instead**: Kafka, Pulsar, NATS
+**Real ceiling**: Single-region write latency ≤ 5ms. Cross-region writes always pay the speed-of-light tax.
 
-PostgreSQL's LISTEN/NOTIFY is a simple notification system. It has no persistence beyond the current session, no consumer groups, no message replay, and no backpressure. For high-throughput event streaming with durable, replayable queues, use a dedicated message broker.
+**Use instead**: CockroachDB (PostgreSQL-compatible, distributed consensus), Cassandra (eventually consistent, extremely write-scalable), DynamoDB (global tables with last-writer-wins).
 
-## What PostgreSQL handles better than many assume
+**Important caveat**: Many "global active-active" requirements are actually "users in multiple regions need fast reads" — solvable with PostgreSQL read replicas per region. True multi-region write requirements are rarer than assumed.
 
-- **Vector search**: pgvector with HNSW is production-ready at moderate scale (< 10M embeddings)
-- **Full-text search**: pg_trgm + tsvector covers most application FTS needs without Elasticsearch
-- **Time-series at moderate scale**: partitioning + BRIN indexes work well for < 100k writes/minute
-- **JSON documents**: JSONB with GIN indexes covers most MongoDB use cases with ACID guarantees
-- **Queues**: SKIP LOCKED pattern works well for most background job systems
+#### 3. Pure OLAP at petabyte scale with sub-second latency
+**Why PostgreSQL fails**: Row-store access pattern for analytical queries reads 10-50x more data than necessary. PostgreSQL's query planner is optimized for OLTP not OLAP execution plans. No vectorized execution. No late materialization. Aggregation on 100M+ rows takes seconds to minutes.
 
-## Beginner view
-Use PostgreSQL unless you have a specific, measured reason not to. Most "we need Redis/Kafka/Elasticsearch" decisions are premature optimization.
+**Real ceiling**: Analytical queries on > 100M rows with sub-second latency requirements.
 
-## Intermediate view
-Validate each requirement before adding a specialized system. Measure your actual throughput, latency, and query patterns against PostgreSQL's real behavior — not theoretical limits.
+**Use instead**: ClickHouse (OLAP-optimized column store, sub-second on billions of rows), DuckDB (in-process OLAP for development/moderate scale), BigQuery/Redshift (managed column store at petabyte scale).
 
-## Advanced view
-The cost of a specialized system is operational: monitoring, backup, scaling, security, team expertise, and data synchronization. Only pay that cost when PostgreSQL's ceiling is demonstrably below your requirement.
+**Important caveat**: PostgreSQL with parallel query and partition pruning handles analytical workloads well at 10-50M rows. The ceiling is higher than many assume.
+
+#### 4. Pure graph algorithm workloads
+**Why PostgreSQL fails**: Graph traversal in SQL is recursive CTE + JOIN chain. Each hop is a new JOIN operation — O(edges) per hop. Multi-hop traversals (shortest path, PageRank, community detection) on graphs with millions of edges are impractical in SQL.
+
+**Real ceiling**: Reliable graph traversal with < 100ms latency up to ~4-5 hops, for simple traversal patterns. Complex graph algorithms (PageRank) are not tractable in PostgreSQL at scale.
+
+**Use instead**: Neo4j (native graph storage, O(1) edge traversal, Cypher query language), Memgraph (in-memory graph database), Amazon Neptune.
+
+**Important caveat**: PostgreSQL with ltree extension (installed in this environment) handles hierarchical tree structures well (categories, organizational charts). The limit is specifically for dense, non-hierarchical graph traversal.
+
+#### 5. Real-time pub/sub at scale
+**Why PostgreSQL fails**: LISTEN/NOTIFY delivers messages only to connected clients, has no message persistence, no consumer groups, no backpressure, no replay. It is a notification mechanism, not a message queue.
+
+**Real ceiling**: LISTEN/NOTIFY works for simple "something changed" notifications (< 1000/second). It cannot replace Kafka's replayable, persistent, exactly-once delivery.
+
+**Use instead**: Kafka, Pulsar, NATS (for high-throughput event streaming); Redis Pub/Sub (for ephemeral notifications at moderate scale).
+
+### What PostgreSQL handles better than commonly believed
+
+| Capability | Common misconception | Reality |
+|---|---|---|
+| Vector search | "Need a vector DB" | pgvector + HNSW is production-ready for < 10M vectors |
+| Full-text search | "Need Elasticsearch" | tsvector + GIN + ts_rank covers 80% of FTS needs |
+| Time-series | "Need InfluxDB" | Partitioning + BRIN handles < 100K inserts/minute |
+| JSON documents | "Need MongoDB" | JSONB + GIN covers most MongoDB use cases with ACID |
+| Job queues | "Need Redis/Celery" | SKIP LOCKED pattern handles millions of jobs/day |
+| Caching | "Need Redis" | shared_buffers + pg_prewarm can serve many cache needs |
+
+## Micro-concepts
+- **Write amplification**: N indexes × 1 insert = N+1 writes + WAL. At high insert rates, this is the primary bottleneck.
+- **MVCC tax**: no in-place updates. Every UPDATE is a delete-insert pair. Vacuum is the garbage collector for the deleted half.
+- **Speed-of-light constraint**: no database system can deliver sub-RTT multi-region writes. This is physics, not PostgreSQL's fault.
+- **WAL throughput**: at very high write rates, WAL write speed is the bottleneck. On NVMe, WAL can sustain ~2-5 GB/s. Above that, writes queue.
+- **Single-leader PITR**: in a cluster with streaming replication, all replicas replay from the same primary WAL. A single point of failure for write durability.
+
+## Beginner view / Intermediate view / Advanced view
+
+**Beginner view**: Use PostgreSQL unless you have a specific, measured reason not to. Most "we need Redis/Kafka/Elasticsearch" decisions are premature optimization.
+
+**Intermediate view**: Validate each requirement before adding a specialized system. Measure your actual throughput, latency, and query patterns against PostgreSQL's real behavior — not theoretical limits.
+
+**Advanced view**: PostgreSQL's limits are structural — they cannot be resolved by tuning, indexing, or hardware upgrades alone. Row-store OLAP inefficiency, MVCC dead tuple accumulation, single-leader write throughput, and LISTEN/NOTIFY limitations are architectural properties, not bugs. The decision to use a specialized system is made when the workload structurally requires a different architecture — not when PostgreSQL underperforms due to misuse.
 
 ## Mental model
-PostgreSQL is the Swiss Army knife of databases. It does everything adequately. For workloads at the extremes of any dimension, you need the specialized tool — but only at the extremes.
+PostgreSQL is a city center: dense, well-connected, handles enormous variety of activity. Some things belong outside the city center: the distribution warehouse (ClickHouse for OLAP), the global shipping network (Cassandra for global writes), the dedicated communication tower (Kafka for event streaming). The city center can simulate some of these — you can store packages in a downtown office — but only up to a point. Know the city's limits.
+
+## PostgreSQL view / SQL view / Non-SQL or hybrid view
+
+**PostgreSQL view**: `pg_stat_bgwriter` (checkpoint pressure), `pg_stat_wal` (WAL generation rate), `pg_stat_user_tables` (vacuum health) — these show when you're approaching PostgreSQL's limits.
+
+**SQL view**:
+```sql
+-- blocked: Docker not accessible
+-- WAL generation rate (approaching limit if > 1-2 GB/min)
+SELECT pg_size_pretty(pg_wal_lsn_diff(pg_current_wal_lsn(), '0/0')) AS total_wal_generated;
+
+-- Vacuum lag (approaching limit if n_dead_tup grows faster than it shrinks)
+SELECT relname, n_dead_tup, n_live_tup, last_autovacuum
+FROM pg_stat_user_tables
+ORDER BY n_dead_tup DESC LIMIT 10;
+
+-- Connection count approaching limit
+SELECT count(*), max_conn FROM pg_stat_activity, (SELECT setting::int AS max_conn FROM pg_settings WHERE name = 'max_connections') s
+GROUP BY max_conn;
+```
+
+**Non-SQL / hybrid view**: Load testing tools: pgbench (PostgreSQL-specific), sysbench, HammerDB. These measure actual PostgreSQL throughput against your specific workload to find the ceiling empirically.
 
 ## Design principle
-**Measure before specializing**: instrument your PostgreSQL workload before deciding it cannot handle it. pg_stat_statements often reveals that the bottleneck is a missing index or a bad query, not a database system limit.
+**Measure the ceiling empirically before declaring PostgreSQL insufficient**: run pgbench or a realistic load test, observe `pg_stat_statements` and system IO, and identify the actual bottleneck. The bottleneck is often a missing index, a misconfigured autovacuum, or a poorly written query — not PostgreSQL's architectural limits. Only when the empirical ceiling is reached is a specialized system justified.
 
-## Critical thinking
-A startup says "we'll definitely need Kafka eventually, so let's add it now." What is the counter-argument? What is the cost of adding Kafka prematurely?
+## Critical thinking / Creative thinking / Systems thinking
 
-## Creative thinking
-How would you architect a migration path from a pure PostgreSQL system to a hybrid system (PostgreSQL + Redis) with zero downtime?
+**Critical**: "We'll need Kafka/Redis/ClickHouse eventually" is not a reason to add it today. Systems that are added prematurely impose operational overhead and data synchronization complexity before the performance benefit is needed. The engineering cost of premature specialization is paid immediately; the performance benefit may never materialize.
 
-## Systems thinking
-When you add a specialized system alongside PostgreSQL, what new failure modes appear? (Synchronization lag, inconsistency windows, partial failures, split-brain.)
+**Creative**: For workloads approaching PostgreSQL's limits, consider the "PostgreSQL + extension" path before a separate system: TimescaleDB for time-series, pgvector for vectors, Citus for horizontal sharding, pg_partman for partition management. Each extends PostgreSQL's ceiling without adding a new system to operate.
+
+**Systems**: Every specialized system added alongside PostgreSQL creates three new failure modes: (1) data synchronization failure (the two systems drift apart), (2) partial failure (data written to PostgreSQL but not yet to the specialized system), (3) split-brain (the two systems have inconsistent state). Each failure mode requires detection logic, alerting, and recovery procedures — multiplied across every specialized system in your architecture.
 
 ## MCP and agent perspective
-For AI agents, PostgreSQL's generality is a feature: one system means one audit log, one permission model, one backup strategy. Prefer PostgreSQL + extensions over a multi-system architecture for agent memory unless scale genuinely demands it.
+For AI agent infrastructure, PostgreSQL's generality is a feature: one system means one audit log, one permission model, one backup strategy, one connection pool, one monitoring setup. Prefer `PostgreSQL + extensions` over a multi-system architecture for agent memory. The specific case where a specialized system is justified for agents: > 10M embeddings (consider Qdrant or Weaviate), or > 100K agent events/second (consider InfluxDB for the event log, PostgreSQL for structured state).
 
 ## Ontology perspective
-[[performance-ontology]] [[observability-ontology]] [[vector-search-ontology]] [[time-series-ontology]]
+The decision "when not to use PostgreSQL" is an ontological decision: what is the fundamental nature of this data? PostgreSQL's relational ontology (entities, relationships, transactions) is the most general. When data is fundamentally temporal (time-series), fundamentally connected (graph), or fundamentally immutable-analytical (OLAP), a specialized ontology may provide a more natural — and more performant — representation. Choosing the wrong ontology is not a configuration problem; it is an architectural mismatch.
+
+## Practice session
+
+**Exercise 1 — Measure write throughput ceiling**: Use pgbench for baseline.
+```bash
+# Shell (blocked: Docker not accessible)
+# pgbench -c 10 -j 2 -T 60 -U cfp cfp
+# Records: TPS (transactions per second) — PostgreSQL's actual OLTP ceiling on this hardware
+```
+
+**Exercise 2 — WAL generation rate**: Is write rate approaching WAL limits?
+```sql
+-- blocked: Docker not accessible
+SELECT pg_size_pretty(pg_wal_lsn_diff(pg_current_wal_lsn(), '0/0'::pg_lsn)) AS wal_generated;
+-- Wait 60s, then measure again:
+-- WAL generated / 60 = WAL bytes per second
+```
+
+**Exercise 3 — Vacuum health check**: Is dead tuple accumulation under control?
+```sql
+-- blocked: Docker not accessible
+SELECT relname,
+       n_dead_tup,
+       round(n_dead_tup::numeric / nullif(n_live_tup + n_dead_tup, 0) * 100, 1) AS dead_pct,
+       last_autovacuum
+FROM pg_stat_user_tables
+WHERE n_live_tup > 1000
+ORDER BY dead_pct DESC NULLS LAST;
+-- dead_pct > 20% consistently = autovacuum can't keep up with write rate
+```
+
+**Exercise 4 — Connection saturation**: How close to max_connections?
+```sql
+-- blocked: Docker not accessible
+SELECT count(*) AS active, (SELECT setting::int FROM pg_settings WHERE name = 'max_connections') AS max,
+       round(count(*)::numeric / (SELECT setting::int FROM pg_settings WHERE name = 'max_connections') * 100, 1) AS pct
+FROM pg_stat_activity;
+-- > 80% = connection pool required immediately
+```
+
+**Exercise 5 — LISTEN/NOTIFY scale test**: Observe limits at low throughput.
+```sql
+-- blocked: Docker not accessible
+-- Session 1: Listen
+LISTEN test_channel;
+-- Session 2: Notify rapidly
+DO $$ BEGIN
+    FOR i IN 1..100 LOOP
+        PERFORM pg_notify('test_channel', 'message ' || i::text);
+    END LOOP;
+END $$;
+-- Session 1: LISTEN delivers all 100 messages — but only to connected listeners, no persistence
+```
 
 ## References
-- [PostgreSQL vs X comparison](https://www.postgresql.org/about/) — official capability docs
-- [When to use Redis](https://redis.io/docs/about/) — Redis documentation
-- [ClickHouse performance benchmarks](https://clickhouse.com/docs/en/getting-started/example-datasets/) — OLAP benchmarks
-- [Kafka vs PostgreSQL queues](https://www.pgcon.org) — PGCon talks on queue patterns
+- PostgreSQL Documentation: [About PostgreSQL](https://www.postgresql.org/about/)
+- InfluxDB: https://docs.influxdata.com/influxdb/ — time-series at scale
+- ClickHouse: https://clickhouse.com/docs/ — OLAP column store
+- CockroachDB: https://www.cockroachlabs.com/docs/ — distributed SQL
+- Neo4j: https://neo4j.com/docs/ — native graph database
+- Kafka: https://kafka.apache.org/documentation/ — event streaming
+- pgbench: [PostgreSQL Documentation](https://www.postgresql.org/docs/16/pgbench.html) — load testing tool
+- Bruce Momjian: [PostgreSQL Limitations](https://momjian.us/main/writings/pgsql/) — honest assessment from a core contributor
